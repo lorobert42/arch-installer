@@ -122,7 +122,7 @@
 		},
 		"network_config": {
 			"type": "iso"
-		}
+		},
     "no_pkg_lookups": false,
     "ntp": true,
     "offline": false,
