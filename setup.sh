@@ -154,7 +154,7 @@ fi
 
 #### Check for package manager ####
 if [ ! -f /sbin/paru ]; then  
-    echo -en "$CNT - Configuering paru."
+    echo -en "$CNT - Configuring paru."
     git clone https://aur.archlinux.org/paru.git &>> $INSTLOG
     cd paru
     makepkg -si --noconfirm &>> ../$INSTLOG &
@@ -201,9 +201,9 @@ if [[ $INST == "Y" || $INST == "y" ]]; then
     fi
 
     # Install the correct hyprland version
-    echo -e "$CNT - Installing Hyprland, this may take a while..."
+    echo -e "$CNT - Installing Sway, this may take a while..."
     if [[ "$ISNVIDIA" == true ]]; then
-        #check for hyprland and remove it so the -nvidia package can be installed
+        #check for sway and remove it so the -nvidia package can be installed
         if paru -Q sway &>> /dev/null ; then
             paru -R --noconfirm sway &>> $INSTLOG &
         fi
@@ -360,7 +360,7 @@ if [[ "$ISNVIDIA" == true ]]; then
     exit
 fi
 
-read -rep $'[\e[1;33mACTION\e[0m] - Would you like to start Hyprland now? (y,n) ' HYP
+read -rep $'[\e[1;33mACTION\e[0m] - Would you like to start Sway now? (y,n) ' HYP
 if [[ $HYP == "Y" || $HYP == "y" ]]; then
     exec sudo systemctl start sddm &>> $INSTLOG
 else
