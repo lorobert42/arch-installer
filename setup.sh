@@ -35,7 +35,7 @@ nvidia_stage=(
 
 #the main packages
 install_stage=(
-    kitty 
+    foot 
     waybar
     xdg-desktop-portal 
     firefox
