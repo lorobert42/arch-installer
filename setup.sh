@@ -37,6 +37,9 @@ install_stage=(
 		chezmoi
     sddm
 		zsh
+		qt5-graphicaleffects 
+		qt5-svg 
+		qt5-quickcontrols2
 )
 
 for str in ${myArray[@]}; do
@@ -69,7 +72,7 @@ show_progress() {
 # function that will test for a package and if not found it will attempt to install it
 install_software() {
     # First lets see if the package is there
-    if paru -Q $1 &>> /dev/null ; then
+    if paru -Q $1 &>> /dev/null || paru -Qg $1 &>> /dev/null ; then
         echo -e "$COK - $1 is already installed."
     else
         # no package found so installing
@@ -77,7 +80,7 @@ install_software() {
         paru -S --noconfirm $1 &>> $INSTLOG &
         show_progress $!
         # test to make sure package installed
-        if paru -Q $1 &>> /dev/null ; then
+        if paru -Q $1 &>> /dev/null || paru -Qg $1 &>> /dev/null ; then
             echo -e "\e[1A\e[K$COK - $1 was installed."
         else
             # if this is hit then a package is missing, exit to review log
@@ -129,6 +132,7 @@ fi
 ### Disable wifi powersave mode ###
 read -rep $'[\e[1;33mACTION\e[0m] - Would you like to disable WiFi powersave? (y,n) ' WIFI
 if [[ $WIFI == "Y" || $WIFI == "y" ]]; then
+		install_software "networkmanager"
     LOC="/etc/NetworkManager/conf.d/wifi-powersave.conf"
     echo -e "$CNT - The following file has been created $LOC.\n"
     echo -e "[connection]\nwifi.powersave = 2" | sudo tee -a $LOC &>> $INSTLOG
@@ -222,7 +226,7 @@ if [[ $CFG == "Y" || $CFG == "y" ]]; then
 		curl -s https://ohmyposh.dev/install.sh | sudo bash -s
 
 		# Apply chezmoi
-		chezmoi --init --apply lorobert42
+		chezmoi init --apply lorobert42
 
     # Copy the SDDM theme
     echo -e "$CNT - Setting up the login screen."
@@ -230,6 +234,7 @@ if [[ $CFG == "Y" || $CFG == "y" ]]; then
     sudo chown -R $USER:$USER /usr/share/sddm/themes/catppuccin-mocha
     sudo mkdir -p /etc/sddm.conf.d
 		sudo cp /home/$USER/.config/sddm/sddm.conf /etc/sddm.conf.d/
+fi
 
 ### Script is done ###
 echo -e "$CNT - Script had completed!"
