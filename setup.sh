@@ -129,28 +129,6 @@ else
     ISNVIDIA=false
 fi
 
-### Disable wifi powersave mode ###
-read -rep $'[\e[1;33mACTION\e[0m] - Would you like to disable WiFi powersave? (y,n) ' WIFI
-if [[ $WIFI == "Y" || $WIFI == "y" ]]; then
-		install_software "networkmanager"
-    LOC="/etc/NetworkManager/conf.d/wifi-powersave.conf"
-    echo -e "$CNT - The following file has been created $LOC.\n"
-    echo -e "[connection]\nwifi.powersave = 2" | sudo tee -a $LOC &>> $INSTLOG
-    echo -en "$CNT - Restarting NetworkManager service, Please wait."
-    sleep 2
-    sudo systemctl restart NetworkManager &>> $INSTLOG
-    
-    #wait for services to restore (looking at you DNS)
-    for i in {1..6} 
-    do
-        echo -n "."
-        sleep 1
-    done
-    echo -en "Done!\n"
-    sleep 2
-    echo -e "\e[1A\e[K$COK - NetworkManager restart completed."
-fi
-
 #### Check for package manager ####
 if [ ! -f /sbin/paru ]; then  
     echo -en "$CNT - Configuring paru."
@@ -172,6 +150,28 @@ if [ ! -f /sbin/paru ]; then
         echo -e "\e[1A\e[K$CER - paru install failed, please check the install.log"
         exit
     fi
+fi
+
+### Disable wifi powersave mode ###
+read -rep $'[\e[1;33mACTION\e[0m] - Would you like to disable WiFi powersave? (y,n) ' WIFI
+if [[ $WIFI == "Y" || $WIFI == "y" ]]; then
+		install_software "networkmanager"
+    LOC="/etc/NetworkManager/conf.d/wifi-powersave.conf"
+    echo -e "$CNT - The following file has been created $LOC.\n"
+    echo -e "[connection]\nwifi.powersave = 2" | sudo tee -a $LOC &>> $INSTLOG
+    echo -en "$CNT - Restarting NetworkManager service, Please wait."
+    sleep 2
+    sudo systemctl restart NetworkManager &>> $INSTLOG
+    
+    #wait for services to restore (looking at you DNS)
+    for i in {1..6} 
+    do
+        echo -n "."
+        sleep 1
+    done
+    echo -en "Done!\n"
+    sleep 2
+    echo -e "\e[1A\e[K$COK - NetworkManager restart completed."
 fi
 
 ### Install all of the above pacakges ####
