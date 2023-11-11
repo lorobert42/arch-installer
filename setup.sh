@@ -40,6 +40,7 @@ install_stage=(
 		qt5-graphicaleffects 
 		qt5-svg 
 		qt5-quickcontrols2
+		polybar
 )
 
 for str in ${myArray[@]}; do
@@ -211,6 +212,13 @@ if [[ $INST == "Y" || $INST == "y" ]]; then
     # Enable the sddm login manager service
     echo -e "$CNT - Enabling the SDDM Service..."
     sudo systemctl enable sddm &>> $INSTLOG
+    sleep 2
+fi
+
+if [[ $ISVM == *"vm"* ]]; then
+    echo -e "$CWR - Installing VirtualBox guest additions..."
+		install_software "virtualbox-guest-utils"
+		sudo systemctl enable vboxservice
     sleep 2
 fi
 
