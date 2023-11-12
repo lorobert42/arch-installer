@@ -41,6 +41,8 @@ install_stage=(
 		qt5-svg 
 		qt5-quickcontrols2
 		polybar
+		rofi
+		dunst
 )
 
 for str in ${myArray[@]}; do
