@@ -13,6 +13,7 @@ prep_stage=(
 		xorg
 		xorg-xinit
     pacman-contrib
+		plymouth
 )
 
 #software for nvidia GPU only
@@ -244,6 +245,14 @@ if [[ $CFG == "Y" || $CFG == "y" ]]; then
     sudo chown -R $USER:$USER /usr/share/sddm/themes/catppuccin-mocha
     sudo mkdir -p /etc/sddm.conf.d
 		sudo cp /home/$USER/.config/sddm/sddm.conf /etc/sddm.conf.d/
+
+		# Setup plymouth
+		echo -e "$CNT - Setting up the boot screen."
+		sudo cp -R /home/$USER/.config/plymouth/themes/catppuccin-mocha /usr/share/plymouth/themes/
+		sudo sed -i 's/timeout.*/timeout 0/' /boot/loader/loader.conf
+		sudo sed -i '/options/s/$/ quiet splash/' /boot/loader/entries/*_linux-hardened.conf
+		sudo sed -i '/HOOKS/s/)/ plymouth)/' /etc/mkinitcpio.conf
+		sudo plymouth-set-default-theme -R catppuccin-mocha
 fi
 
 ### Script is done ###
