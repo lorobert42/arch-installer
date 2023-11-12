@@ -21,8 +21,7 @@ nvidia_stage=(
     linux-headers 
     nvidia-dkms 
     nvidia-settings 
-    libva 
-    libva-nvidia-driver-git
+		mesa
 )
 
 #the main packages
@@ -197,8 +196,26 @@ if [[ $INST == "Y" || $INST == "y" ]]; then
     
         # update config
         sudo sed -i 's/MODULES=()/MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)/' /etc/mkinitcpio.conf
-        sudo mkinitcpio --config /etc/mkinitcpio.conf --generate /boot/initramfs-custom.img
-        echo -e "options nvidia-drm modeset=1" | sudo tee -a /etc/modprobe.d/nvidia.conf &>> $INSTLOG
+        sudo mkinitcpio -P
+				sudo cat > /etc/pacman.d/hooks/nvidia.hook << EOF
+[Trigger]
+Operation=Install
+Operation=Upgrade
+Operation=Remove
+Type=Package
+Target=nvidia
+Target=linux-hardened
+# Change the linux part above if a different kernel is used
+
+[Action]
+Description=Update NVIDIA module in initcpio
+Depends=mkinitcpio
+When=PostTransaction
+NeedsTargets
+Exec=/bin/sh -c 'while read -r trg; do case $trg in linux*) exit 0; esac; done; /usr/bin/mkinitcpio -P'
+EOF
+				sudo nvidia-xconfig
+        # echo -e "options nvidia-drm modeset=1" | sudo tee -a /etc/modprobe.d/nvidia.conf &>> $INSTLOG
     fi
 
     # Stage 1 - main components
