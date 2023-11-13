@@ -16,14 +16,6 @@ prep_stage=(
 		plymouth
 )
 
-#software for nvidia GPU only
-nvidia_stage=(
-    linux-headers 
-    nvidia-dkms 
-    nvidia-settings 
-		mesa
-)
-
 #the main packages
 install_stage=(
 		i3-wm
@@ -43,6 +35,10 @@ install_stage=(
 		polybar
 		rofi
 		dunst
+		mesa
+		light
+		xclip
+		npm
 )
 
 for str in ${myArray[@]}; do
@@ -125,13 +121,6 @@ else
     exit
 fi
 
-# find the Nvidia GPU
-if lspci -k | grep -A 2 -E "(VGA|3D)" | grep -iq nvidia; then
-    ISNVIDIA=true
-else
-    ISNVIDIA=false
-fi
-
 #### Check for package manager ####
 if [ ! -f /sbin/paru ]; then  
     echo -en "$CNT - Configuring paru."
@@ -187,47 +176,11 @@ if [[ $INST == "Y" || $INST == "y" ]]; then
         install_software $SOFTWR 
     done
 
-    # Setup Nvidia if it was found
-    if [[ "$ISNVIDIA" == true ]]; then
-        echo -e "$CNT - Nvidia GPU support setup stage, this may take a while..."
-        for SOFTWR in ${nvidia_stage[@]}; do
-            install_software $SOFTWR
-        done
-    
-        # update config
-        sudo sed -i 's/MODULES=()/MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)/' /etc/mkinitcpio.conf
-        sudo mkinitcpio -P
-				sudo cat > /etc/pacman.d/hooks/nvidia.hook << EOF
-[Trigger]
-Operation=Install
-Operation=Upgrade
-Operation=Remove
-Type=Package
-Target=nvidia
-Target=linux-hardened
-# Change the linux part above if a different kernel is used
-
-[Action]
-Description=Update NVIDIA module in initcpio
-Depends=mkinitcpio
-When=PostTransaction
-NeedsTargets
-Exec=/bin/sh -c 'while read -r trg; do case $trg in linux*) exit 0; esac; done; /usr/bin/mkinitcpio -P'
-EOF
-				sudo nvidia-xconfig
-        # echo -e "options nvidia-drm modeset=1" | sudo tee -a /etc/modprobe.d/nvidia.conf &>> $INSTLOG
-    fi
-
     # Stage 1 - main components
     echo -e "$CNT - Installing main components, this may take a while..."
     for SOFTWR in ${install_stage[@]}; do
         install_software $SOFTWR 
     done
-
-    # # Start the bluetooth service
-    # echo -e "$CNT - Starting the Bluetooth Service..."
-    # sudo systemctl enable --now bluetooth.service &>> $INSTLOG
-    # sleep 2
 
     # Enable the sddm login manager service
     echo -e "$CNT - Enabling the SDDM Service..."
@@ -236,7 +189,7 @@ EOF
 fi
 
 if [[ $ISVM == *"vm"* ]]; then
-    echo -e "$CWR - Installing VirtualBox guest additions..."
+    echo -e "$CNT - Installing VirtualBox guest additions..."
 		install_software "virtualbox-guest-utils"
 		sudo systemctl enable vboxservice
     sleep 2
